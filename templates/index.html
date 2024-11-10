@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heartbeat Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 0.2em;
+            color: #333;
+        }
+        p {
+            font-size: 1.2em;
+            color: #777;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            justify-items: center;
+        }
+        .metric-card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            transition: transform 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        .metric-card h3 {
+            margin: 0;
+            font-size: 1.5em;
+            color: #333;
+        }
+        .metric-card canvas {
+            margin-top: 15px;
+            width: 100%;
+            height: auto;
+        }
+        .metric-card p {
+            margin-top: 10px;
+            font-size: 1.2em;
+            color: #555;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Heartbeat Dashboard</h1>
+            <p>by Xelvanta Group Systems</p>
+        </header>
+
+        <div class="metrics">
+            <div class="metric-card">
+                <h3>CPU Usage</h3>
+                <canvas id="cpuChart" height="200"></canvas>
+                <p id="cpuValue">Loading...</p>
+            </div>
+
+            <div class="metric-card">
+                <h3>Memory Usage</h3>
+                <canvas id="memoryChart" height="200"></canvas>
+                <p id="memoryValue">Loading...</p>
+            </div>
+
+            <div class="metric-card">
+                <h3>Disk Usage</h3>
+                <canvas id="diskChart" height="200"></canvas>
+                <p id="diskValue">Loading...</p>
+            </div>
+
+            <div class="metric-card">
+                <h3>Bytes Sent</h3>
+                <canvas id="sentChart" height="200"></canvas>
+            </div>
+
+            <div class="metric-card">
+                <h3>Bytes Received</h3>
+                <canvas id="recvChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const updateInterval = 1000; // Update interval in milliseconds
+
+        let cpuChart, memoryChart, diskChart, sentChart, recvChart;
+
+        function initializeCharts() {
+            cpuChart = new Chart(document.getElementById('cpuChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'CPU Usage (%)',
+                        data: [],
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                }
+            });
+
+            memoryChart = new Chart(document.getElementById('memoryChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Memory Usage (%)',
+                        data: [],
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                }
+            });
+
+            diskChart = new Chart(document.getElementById('diskChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Disk Usage (%)',
+                        data: [],
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                }
+            });
+
+            sentChart = new Chart(document.getElementById('sentChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Bytes Sent',
+                        data: [],
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                }
+            });
+
+            recvChart = new Chart(document.getElementById('recvChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Bytes Received',
+                        data: [],
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                }
+            });
+        }
+
+        function updateCharts(metrics) {
+            const currentTime = new Date().toLocaleTimeString();
+
+            updateChartData(cpuChart, metrics.cpu, currentTime);
+            updateChartData(memoryChart, metrics.memory, currentTime);
+            updateChartData(diskChart, metrics.disk, currentTime);
+            updateChartData(sentChart, metrics.network.sent, currentTime);
+            updateChartData(recvChart, metrics.network.recv, currentTime);
+
+            document.getElementById('cpuValue').textContent = `CPU: ${metrics.cpu}%`;
+            document.getElementById('memoryValue').textContent = `Memory: ${metrics.memory}%`;
+            document.getElementById('diskValue').textContent = `Disk: ${metrics.disk}%`;
+        }
+
+        function updateChartData(chart, newData, label) {
+            chart.data.labels.push(label); // Add label (timestamp)
+
+            chart.data.datasets[0].data.push(newData);
+
+            // Limit the number of data points
+            if (chart.data.labels.length > 10) {
+                chart.data.labels.shift();  // Remove the oldest label
+                chart.data.datasets.forEach(dataset => {
+                    dataset.data.shift();  // Shift the dataset
+                });
+            }
+
+            chart.update();
+        }
+
+        async function fetchMetrics() {
+            const response = await fetch('/metrics');
+            return response.json();
+        }
+
+        setInterval(async () => {
+            const metrics = await fetchMetrics();
+            updateCharts(metrics);
+        }, updateInterval);
+
+        initializeCharts();
+    </script>
+</body>
+</html>

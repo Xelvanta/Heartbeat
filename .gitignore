@@ -1,0 +1,12 @@
+venv/
+*.log
+*.env
+*.sqlite
+*.db
+secrets.yml
+config.json
+.DS_Store
+node_modules/
+*.pem
+*.key
+.git/
