@@ -3,11 +3,9 @@ import psutil
 import signal
 import sys
 from threading import Thread
-import time
-import config
 
 def get_system_metrics():
-    cpu = psutil.cpu_percent(interval=None)
+    cpu = psutil.cpu_percent(interval=1)
     memory = psutil.virtual_memory().percent
     disk = psutil.disk_usage('/').percent
     network = psutil.net_io_counters()
@@ -25,22 +23,21 @@ def get_system_metrics():
 def update_overlay():
     metrics = get_system_metrics()
 
-    if 'cpu' in metrics and 'memory' in metrics and 'disk' in metrics and 'network' in metrics:
-        cpu_label.config(text=f"CPU: {metrics['cpu']}%")
-        disk_label.config(text=f"Disk: {metrics['disk']}%")
-        network_sent_label.config(text=f"Sent: {metrics['network']['sent']} bytes")
-        network_recv_label.config(text=f"Received: {metrics['network']['recv']} bytes")
+    cpu_label.config(text=f"CPU: {metrics['cpu']}%")
+    disk_label.config(text=f"Disk: {metrics['disk']}%")
+    network_sent_label.config(text=f"Sent: {metrics['network']['sent']} bytes")
+    network_recv_label.config(text=f"Received: {metrics['network']['recv']} bytes")
 
-        memory_label.config(text=f"Memory: {metrics['memory']}%")
-        if metrics['memory'] > config.FATAL_THRESHOLD:
-            memory_label.config(fg="red")  # FATAL level
-        elif metrics['memory'] > config.CRITICAL_THRESHOLD:
-            memory_label.config(fg="orange")  # CRITICAL level
-        elif metrics['memory'] > config.WARNING_THRESHOLD:
-            memory_label.config(fg="yellow")  # WARNING level
-        else:
-            memory_label.config(fg="white")
-
+    memory_label.config(text=f"Memory: {metrics['memory']}%")
+    if metrics['memory'] > 99:
+        memory_label.config(fg="red")  # FATAL level
+    elif metrics['memory'] > 95:
+        memory_label.config(fg="orange")  # CRITICAL level
+    elif metrics['memory'] > 90:
+        memory_label.config(fg="yellow")  # WARNING level
+    else:
+        memory_label.config(fg="white")
+    
     root.after(1000, update_overlay)
 
 def start_overlay():
