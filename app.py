@@ -28,7 +28,7 @@ def async_log_data(metrics):
     logging.info(log_message)
 
 def get_system_metrics():
-    cpu = psutil.cpu_percent(interval=None)
+    cpu = psutil.cpu_percent(interval=0.5)
     memory = psutil.virtual_memory().percent
     disk = psutil.disk_usage('/').percent
     network = psutil.net_io_counters()
