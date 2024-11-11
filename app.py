@@ -1,12 +1,20 @@
 import logging
 from flask import Flask, render_template, jsonify
 import psutil
+import subprocess
 from datetime import datetime
 
 app = Flask(__name__)
 
-# Set up logging with different levels
-logging.basicConfig(filename='system_metrics.log', level=logging.INFO, 
+# ----- Configuration settings -----
+LOG_FILE = 'system_metrics.log'
+LOG_LEVEL = logging.INFO
+OVERLAY_ENABLED = True  # Set to False to disable overlay
+WARNING_THRESHOLD = 90  # Memory warning threshold (%)
+CRITICAL_THRESHOLD = 95  # Memory critical threshold (%)
+FATAL_THRESHOLD = 99  # Memory fatal threshold (%)
+
+logging.basicConfig(filename=LOG_FILE, level=LOG_LEVEL, 
                     format='%(asctime)s - %(message)s')
 
 log = logging.getLogger('werkzeug')
@@ -25,11 +33,6 @@ def get_system_metrics():
     return metrics
 
 def log_data(metrics):
-    # Memory thresholds
-    WARNING_THRESHOLD = 90
-    CRITICAL_THRESHOLD = 95
-    FATAL_THRESHOLD = 99
-
     if metrics['memory'] >= FATAL_THRESHOLD:
         logging.critical(f"FATAL | Memory usage is at {metrics['memory']}%. System is fatally low on memory and at risk of immediate failure.")
     elif metrics['memory'] >= CRITICAL_THRESHOLD:
@@ -51,4 +54,7 @@ def metrics():
     return jsonify(metrics)
 
 if __name__ == '__main__':
+    if OVERLAY_ENABLED:
+        subprocess.Popen(['python', 'overlay.py'])
+
     app.run(debug=False, use_reloader=False)
