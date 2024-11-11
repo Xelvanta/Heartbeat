@@ -70,6 +70,12 @@ gunicorn -w 4 app:app
 - `-w 4` specifies the number of worker processes (you can adjust based on your system resources).
 - `app:app` points to the `app` variable in the `app.py` file.
 
+Alternatively, bind to 0.0.0.0:8000 only if using a reverse proxy with authentication (e.g., Nginx) to secure external access:
+
+```bash
+gunicorn -w 4 -b 0.0.0.0:8000 app:app
+```
+
 #### Set up Reverse Proxy with Nginx (Optional)
 
 For better performance, security, and load balancing, you can configure a reverse proxy using **Nginx**.
