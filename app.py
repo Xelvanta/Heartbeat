@@ -5,6 +5,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+# Set up logging with different levels
 logging.basicConfig(filename='system_metrics.log', level=logging.INFO, 
                     format='%(asctime)s - %(message)s')
 
@@ -24,8 +25,20 @@ def get_system_metrics():
     return metrics
 
 def log_data(metrics):
-    log_message = f"CPU: {metrics['cpu']}%, Memory: {metrics['memory']}%, Disk: {metrics['disk']}%, " \
-                  f"Network Sent: {metrics['network']['sent']} bytes, Network Recv: {metrics['network']['recv']} bytes"
+    # Memory thresholds
+    WARNING_THRESHOLD = 90
+    CRITICAL_THRESHOLD = 95
+    EMERGENCY_THRESHOLD = 99
+
+    if metrics['memory'] >= EMERGENCY_THRESHOLD:
+        logging.critical(f"EMERGENCY ALERT | Memory usage is at {metrics['memory']}%. System is critically low on memory.")
+    elif metrics['memory'] >= CRITICAL_THRESHOLD:
+        logging.warning(f"CRITICAL ALERT | Memory usage is at {metrics['memory']}%.")
+    elif metrics['memory'] >= WARNING_THRESHOLD:
+        logging.warning(f"WARNING | Memory usage is at {metrics['memory']}%.")
+
+    log_message = f"CPU: {metrics['cpu']}% | Memory: {metrics['memory']}% | Disk: {metrics['disk']}% | " \
+                  f"Network Sent: {metrics['network']['sent']} bytes | Network Recv: {metrics['network']['recv']} bytes"
     logging.info(log_message)
 
 @app.route('/')

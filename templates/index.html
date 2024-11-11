@@ -101,11 +101,13 @@
             <div class="metric-card">
                 <h3>Bytes Sent</h3>
                 <canvas id="sentChart" height="200"></canvas>
+                <p id="sentValue">Loading...</p>
             </div>
 
             <div class="metric-card">
                 <h3>Bytes Received</h3>
                 <canvas id="recvChart" height="200"></canvas>
+                <p id="recvValue">Loading...</p>
             </div>
         </div>
     </div>
@@ -199,18 +201,20 @@
             document.getElementById('cpuValue').textContent = `CPU: ${metrics.cpu}%`;
             document.getElementById('memoryValue').textContent = `Memory: ${metrics.memory}%`;
             document.getElementById('diskValue').textContent = `Disk: ${metrics.disk}%`;
+            document.getElementById('sentValue').textContent = `Sent: ${metrics.network.sent.toLocaleString()} bytes`;
+            document.getElementById('recvValue').textContent = `Received: ${metrics.network.recv.toLocaleString()} bytes`;
         }
 
         function updateChartData(chart, newData, label) {
-            chart.data.labels.push(label); // Add label (timestamp)
+            chart.data.labels.push(label);
 
             chart.data.datasets[0].data.push(newData);
 
             // Limit the number of data points
             if (chart.data.labels.length > 10) {
-                chart.data.labels.shift();  // Remove the oldest label
+                chart.data.labels.shift();
                 chart.data.datasets.forEach(dataset => {
-                    dataset.data.shift();  // Shift the dataset
+                    dataset.data.shift();
                 });
             }
 
