@@ -10,3 +10,5 @@ node_modules/
 *.pem
 *.key
 .git/
+__pycache__/
+*.pyc
