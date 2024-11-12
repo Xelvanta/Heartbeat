@@ -107,6 +107,7 @@ def final_delete_confirmation(install_dir, confirm_window, repo_url, run_app):
         confirm_window.destroy()
 
     def on_final_no_click():
+        messagebox.showinfo("Operation Cancelled", "The operation has been cancelled. Please select an empty folder.")
         confirm_window.destroy()
 
     confirm_window = tk.Toplevel(root)
