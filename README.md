@@ -13,74 +13,94 @@
 ## Requirements
 
 - Python 3.x
-- Pip (Python package manager)
+- Pip (Python package manager; usually comes with Python)
 - Gunicorn (for production deployment)
 
 ## Installation
 
-To run **Heartbeat** locally, follow these steps:
+You can install **Heartbeat** and run it locally using one of the following methods:
 
-### 1. Clone the repository
+### Option 1: Clone the Repository and Install Dependencies Manually
 
-```bash
-git clone https://github.com/yourusername/heartbeat.git
-cd heartbeat
-```
+1. Clone the repository:
 
-### 2. Install dependencies
+   ```bash
+   git clone https://github.com/yourusername/heartbeat.git
+   cd heartbeat
+   ```
 
-Ensure you have Python and pip installed, then run the following to install the required Python libraries:
+2. Install the required dependencies:
 
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### 3. Start the Flask server for Development
+### Option 2: Use the Installer Script (Recommended for Non-Developers)
 
-For local development, run the following command to start the Flask server:
+This option provides a simple installation through a script that automatically handles setup. You can use the `Heartbeat_Installer.py` script, which will automatically clone the repository into your desired directory and install all necessary dependencies:
+
+1. Download the `Heartbeat_Installer.py` script from the repository.
+2. Run the script, enter a directory into the prompt, and it will handle the cloning and installation automatically.
+
+## Running the Application
+
+Once you've installed **Heartbeat**, you can run it using one of the following methods:
+
+### Option 1: Manual Setup (Development)
+
+To start the Flask server for development:
 
 ```bash
 python app.py
 ```
 
-Once the server is running, you can view the **Heartbeat Dashboard** by navigating to:
+### Option 2: Use the Launcher Script (Development)
+
+For convenience, you can run the `Heartbeat_Launcher.py` script directly from the folder where you cloned the repository. The script will automatically navigate to the correct directory and launch the app:
+
+1. Using a file explorer, open the folder where the repository was cloned.
+2. Once you're in the correct folder, double-click `Heartbeat_Launcher.py` to run it.
+
+### Heartbeat Dashboard
+
+Once the server is running, access the **Heartbeat Dashboard** by navigating to:
 
 ```
 http://127.0.0.1:5000/
 ```
 
-### 4. Deploy to Production
+## Deploy to Production
 
-For a production environment, it is recommended to use **Gunicorn**, a production-grade WSGI server, instead of the built-in Flask server.
+For production use, it’s recommended to use **Gunicorn**, a production-grade WSGI server, instead of the Flask development server.
 
-#### Install Gunicorn
+### Install Gunicorn
 
 ```bash
 pip install gunicorn
 ```
 
-#### Run with Gunicorn
+### Run with Gunicorn
 
-To start the Flask application with Gunicorn, run:
+To start the application with Gunicorn:
 
 ```bash
 gunicorn -w 4 app:app
 ```
 
-- `-w 4` specifies the number of worker processes (you can adjust based on your system resources).
+- `-w 4` specifies the number of worker processes (adjust based on system resources).
 - `app:app` points to the `app` variable in the `app.py` file.
 
-Alternatively, bind to 0.0.0.0:8000 only if using a reverse proxy with authentication (e.g., Nginx) to secure external access:
+You can also bind Gunicorn to `0.0.0.0:8000` if using a reverse proxy (e.g., Nginx):
 
 ```bash
 gunicorn -w 4 -b 0.0.0.0:8000 app:app
 ```
 
-#### Set up Reverse Proxy with Nginx (Optional)
+### Set Up Reverse Proxy with Nginx (Optional)
 
-For better performance, security, and load balancing, you can configure a reverse proxy using **Nginx**.
+For better performance, security, and load balancing, you can configure a reverse proxy with **Nginx**.
 
-Example Nginx Configuration:
+Example Nginx configuration:
 
 ```nginx
 server {
@@ -96,15 +116,15 @@ server {
 }
 ```
 
-After updating Nginx, reload the service:
+After updating Nginx, restart the service:
 
 ```bash
 sudo systemctl restart nginx
 ```
 
-### 5. Viewing the Dashboard
+### Viewing the Dashboard
 
-Once the application is running in production, you can view the **Heartbeat Dashboard** by navigating to your server's IP address or domain:
+Once the application is running in production, navigate to your server's IP address or domain to view the **Heartbeat Dashboard**:
 
 ```
 http://your_domain.com/
@@ -114,9 +134,9 @@ http://your_domain.com/
 
 ### Backend (Flask API)
 
-The backend of **Heartbeat** is built using **Flask**, a lightweight Python web framework. The Flask app provides an API endpoint `/metrics`, which serves the current system metrics in JSON format.
+The backend of **Heartbeat** uses **Flask**, a lightweight Python web framework, to serve the system metrics via an API endpoint `/metrics` in JSON format.
 
-Key parts of the code:
+Key components:
 
 - **`get_system_metrics()`**: Gathers CPU, memory, disk, and network data using the `psutil` library.
 - **`log_data()`**: Logs system metrics to a file for historical tracking.
@@ -124,29 +144,29 @@ Key parts of the code:
 
 ### Frontend (Dashboard)
 
-The dashboard is created using HTML, CSS, and JavaScript. It features **Chart.js** for visualizing the system metrics over time. 
+The dashboard is created using HTML, CSS, and JavaScript, with **Chart.js** to visualize system metrics in real-time.
 
-- **Charts**: Displays real-time updates for CPU, memory, disk usage, and network activity.
+- **Charts**: Displays real-time graphs for CPU, memory, disk usage, and network activity.
 - **Fetch Metrics**: Periodically fetches system metrics from the backend via the `/metrics` endpoint.
 
 ## Usage
 
-Once the application is running, the dashboard will automatically refresh every second to update the system metrics. You will see:
+Once **Heartbeat** is running, the dashboard will automatically refresh every second to update the system metrics. You will see:
 
-- **CPU Usage**: A graph showing the current CPU usage.
-- **Memory Usage**: A graph showing the current memory usage.
-- **Disk Usage**: A graph showing the current disk usage.
+- **CPU Usage**: Graph showing the current CPU load.
+- **Memory Usage**: Graph showing memory consumption.
+- **Disk Usage**: Graph showing available disk space.
 - **Network Activity**: Graphs showing the amount of data sent and received.
 
 You can modify the update interval and customize the dashboard by editing the `updateInterval` variable in the JavaScript section.
 
 ## Logging
 
-Heartbeat logs all metrics into a file (`system_metrics.log`). Each entry contains the current system state, including CPU, memory, disk, and network metrics, along with the timestamp.
+**Heartbeat** logs system metrics to a file (`system_metrics.log`). Each log entry includes CPU, memory, disk, and network data, along with a timestamp.
 
 ## Contributing
 
-We welcome contributions! If you'd like to improve or expand **Heartbeat**, feel free to fork the project and submit a pull request.
+We welcome contributions! Feel free to fork the project and submit a pull request if you’d like to help improve or expand **Heartbeat**.
 
 ## License
 
