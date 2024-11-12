@@ -1,9 +1,8 @@
 import logging
 import psutil
 import subprocess
-import threading
+import asyncio
 from flask import Flask, render_template, jsonify
-from datetime import datetime
 import time
 import config
 
@@ -15,7 +14,7 @@ logging.basicConfig(filename=config.LOG_FILE, level=config.LOG_LEVEL,
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
-def async_log_data(metrics):
+async def log_data(metrics):
     if metrics['memory'] >= config.FATAL_THRESHOLD:
         logging.critical(f"FATAL | Memory usage is at {metrics['memory']}%. System is fatally low on memory and at risk of immediate failure.")
     elif metrics['memory'] >= config.CRITICAL_THRESHOLD:
@@ -33,10 +32,18 @@ def get_system_metrics():
     disk = psutil.disk_usage('/').percent
     network = psutil.net_io_counters()
     
-    metrics = {'cpu': cpu, 'memory': memory, 'disk': disk, 'network': {
-        'sent': network.bytes_sent, 'recv': network.bytes_recv}}
+    metrics = {
+        'cpu': cpu,
+        'memory': memory,
+        'disk': disk,
+        'network': {
+            'sent': network.bytes_sent,
+            'recv': network.bytes_recv
+        }
+    }
 
-    threading.Thread(target=async_log_data, args=(metrics,), daemon=True).start()
+    # Run the async logging within the synchronous function
+    asyncio.run(log_data(metrics))
     
     return metrics
 
@@ -57,5 +64,5 @@ if __name__ == '__main__':
         app.run(debug=False, use_reloader=False)
     else:
         while True:
-            metrics = get_system_metrics()
+            get_system_metrics()
             time.sleep(config.LOG_FREQUENCY)
