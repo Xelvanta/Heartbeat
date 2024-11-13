@@ -4,6 +4,7 @@ import subprocess
 import asyncio
 from flask import Flask, render_template, jsonify
 import time
+import GPUtil
 import config
 
 app = Flask(__name__)
@@ -23,14 +24,31 @@ async def log_data(metrics):
         logging.warning(f"WARNING | Memory usage is at {metrics['memory']}%.")
 
     log_message = f"CPU: {metrics['cpu']}% | Memory: {metrics['memory']}% | Disk: {metrics['disk']}% | " \
-                  f"Network Sent: {metrics['network']['sent']} bytes | Network Recv: {metrics['network']['recv']} bytes"
+                  f"Network Sent: {metrics['network']['sent']} bytes | Network Recv: {metrics['network']['recv']} bytes | " \
+                  f"GPU Usage: {metrics['gpu']['usage']}% | GPU Memory: {metrics['gpu']['memory']}% | GPU Temp: {metrics['gpu']['temperature']}°C"
     logging.info(log_message)
+
+def get_gpu_metrics():
+    # Get the first available GPU (assuming single GPU, modify if multiple GPUs)
+    gpus = GPUtil.getGPUs()
+    if gpus:
+        gpu = gpus[0]
+        gpu_usage = gpu.load * 100  # load is a fraction, so multiply by 100 to get a percentage
+        gpu_memory = gpu.memoryUtil * 100  # same as above
+        gpu_temp = gpu.temperature
+        return {
+            'usage': gpu_usage,
+            'memory': gpu_memory,
+            'temperature': gpu_temp
+        }
+    return {'usage': 0, 'memory': 0, 'temperature': 0}
 
 def get_system_metrics():
     cpu = psutil.cpu_percent(interval=0.5)
     memory = psutil.virtual_memory().percent
     disk = psutil.disk_usage('/').percent
     network = psutil.net_io_counters()
+    gpu = get_gpu_metrics()
     
     metrics = {
         'cpu': cpu,
@@ -39,7 +57,8 @@ def get_system_metrics():
         'network': {
             'sent': network.bytes_sent,
             'recv': network.bytes_recv
-        }
+        },
+        'gpu': gpu
     }
 
     # Run the async logging within the synchronous function
